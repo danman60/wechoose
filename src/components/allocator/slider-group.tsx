@@ -53,9 +53,6 @@ export function SliderGroup() {
     setError(null);
 
     try {
-      // We need category IDs from the database, but since we're using slugs
-      // in the client, the API route will need to map them.
-      // For now, use slugs as identifiers — the API will handle mapping.
       const items = Object.entries(allocations)
         .filter(([, pct]) => pct > 0)
         .map(([slug, percentage]) => ({
@@ -81,13 +78,11 @@ export function SliderGroup() {
       }
 
       setSuccess(true);
-      // Store allocation in sessionStorage for results page
       sessionStorage.setItem(
         "wechoose_allocation",
         JSON.stringify(allocations)
       );
 
-      // Redirect to results after a brief moment
       setTimeout(() => {
         router.push("/results");
       }, 1500);
@@ -114,25 +109,28 @@ export function SliderGroup() {
 
   return (
     <div>
-      {/* Remaining counter */}
+      {/* Sticky allocation bar */}
       <div
         className={`sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-gov-separator py-3 px-4 mb-6 ${
           isValid ? "border-b-diff-positive" : ""
         }`}
       >
-        <div className="max-w-[800px] mx-auto flex items-center justify-between">
-          <div>
-            <span className="text-lg font-bold font-heading text-gov-text">
-              Allocated:{" "}
-              <span className={isValid ? "text-diff-positive" : "text-people-blue"}>
-                {totalAllocated.toFixed(1)}%
+        <div className="max-w-[1200px] mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div>
+              <span className="text-lg font-bold font-heading text-gov-text">
+                Allocated:{" "}
+                <span className={isValid ? "text-diff-positive" : "text-people-blue"}>
+                  {totalAllocated.toFixed(1)}%
+                </span>
               </span>
-            </span>
-            {!isValid && (
-              <span className="text-sm text-gov-text/60 ml-3">
-                {remaining.toFixed(1)}% remaining
-              </span>
-            )}
+              {!isValid && (
+                <span className="text-sm text-gov-text/60 ml-3">
+                  {remaining.toFixed(1)}% remaining
+                </span>
+              )}
+            </div>
+            <PostalCodeInput onPostalCodeChange={handlePostalCodeChange} />
           </div>
           <Button
             onClick={handleSubmit}
@@ -145,21 +143,13 @@ export function SliderGroup() {
       </div>
 
       {error && (
-        <div className="max-w-[800px] mx-auto mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm">
+        <div className="max-w-[1200px] mx-auto mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm">
           {error}
         </div>
       )}
 
-      {/* Postal code */}
-      <div className="max-w-[800px] mx-auto mb-6">
-        <PostalCodeInput onPostalCodeChange={handlePostalCodeChange} />
-        <p className="text-xs text-gov-text/50 mt-1">
-          Used for provincial breakdown only. Not stored with your identity.
-        </p>
-      </div>
-
-      {/* Category sliders */}
-      <div className="max-w-[800px] mx-auto">
+      {/* Category grid — compact cards side by side */}
+      <div className="max-w-[1200px] mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-3">
         {BUDGET_CATEGORIES.map((cat) => (
           <CategoryCard
             key={cat.slug}
@@ -179,7 +169,7 @@ export function SliderGroup() {
       </div>
 
       {/* Bottom submit */}
-      <div className="max-w-[800px] mx-auto mt-8 text-center">
+      <div className="max-w-[1200px] mx-auto mt-8 text-center">
         <p className="text-sm text-gov-text/50 mb-4">
           One voice per person. Your response is tied to your connection to prevent duplicates.
         </p>
