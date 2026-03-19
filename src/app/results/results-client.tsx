@@ -6,6 +6,9 @@ import { ComparisonChart } from "@/components/results/comparison-chart";
 import { AggregateCounter } from "@/components/results/aggregate-counter";
 import { GapCards } from "@/components/results/gap-card";
 import { ShareButtons } from "@/components/shared/share-buttons";
+import { EmailMPButton } from "@/components/shared/email-mp-button";
+import { BUDGET_CATEGORIES } from "@/lib/data/budget-categories";
+import type { Riding } from "@/lib/data/ridings";
 import type { AggregateCache } from "@/types";
 
 interface EnrichedAggregate extends AggregateCache {
@@ -24,6 +27,7 @@ export function ResultsClient() {
     number
   > | null>(null);
   const [allocationId, setAllocationId] = useState<string | null>(null);
+  const [riding, setRiding] = useState<Riding | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,6 +42,16 @@ export function ResultsClient() {
     }
     const storedId = sessionStorage.getItem("wechoose_allocation_id");
     if (storedId) setAllocationId(storedId);
+
+    // Load riding from sessionStorage
+    const storedRiding = sessionStorage.getItem("wechoose_riding");
+    if (storedRiding) {
+      try {
+        setRiding(JSON.parse(storedRiding));
+      } catch {
+        // ignore
+      }
+    }
 
     // Fetch aggregates
     fetch("/api/aggregate")
@@ -98,6 +112,37 @@ export function ResultsClient() {
           {userAllocations && (
             <div className="mt-8">
               <GapCards userAllocations={userAllocations} />
+            </div>
+          )}
+
+          {/* Email Your MP */}
+          {riding && userAllocations && (
+            <div className="mt-8 p-6 bg-gov-well border-t-4 border-gov-red">
+              <h2 className="text-xl font-heading font-bold mb-2">
+                Tell your MP how you feel
+              </h2>
+              <p className="text-sm text-gov-text/70 mb-4">
+                Your MP is{" "}
+                <strong>
+                  {riding.mp_name} ({riding.mp_party})
+                </strong>{" "}
+                representing {riding.name}.
+              </p>
+              <EmailMPButton
+                riding={riding}
+                topGaps={BUDGET_CATEGORIES.map((cat) => ({
+                  name: cat.name,
+                  userPct: userAllocations[cat.slug] ?? 0,
+                  govPct: cat.actual_percentage,
+                }))
+                  .sort(
+                    (a, b) =>
+                      Math.abs(b.userPct - b.govPct) -
+                      Math.abs(a.userPct - a.govPct)
+                  )
+                  .slice(0, 3)}
+                totalVoices={data?.totalAllocations}
+              />
             </div>
           )}
 
