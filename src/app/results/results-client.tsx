@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ComparisonChart } from "@/components/results/comparison-chart";
 import { AggregateCounter } from "@/components/results/aggregate-counter";
+import { GapCards } from "@/components/results/gap-card";
+import { ShareButtons } from "@/components/shared/share-buttons";
 import type { AggregateCache } from "@/types";
 
 interface EnrichedAggregate extends AggregateCache {
@@ -21,6 +23,7 @@ export function ResultsClient() {
     string,
     number
   > | null>(null);
+  const [allocationId, setAllocationId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,6 +36,8 @@ export function ResultsClient() {
         // ignore
       }
     }
+    const storedId = sessionStorage.getItem("wechoose_allocation_id");
+    if (storedId) setAllocationId(storedId);
 
     // Fetch aggregates
     fetch("/api/aggregate")
@@ -62,9 +67,12 @@ export function ResultsClient() {
         &gt; Results
       </nav>
 
-      <h1 className="gov-h1 text-3xl md:text-4xl mb-6">
-        The People&apos;s Budget vs. The Government&apos;s Budget
+      <h1 className="gov-h1 text-3xl md:text-4xl mb-2">
+        Here&apos;s what Canadians actually want — and what they actually get.
       </h1>
+      <p className="text-lg text-gov-text/70 mb-6">
+        The People&apos;s Budget vs. The Government&apos;s Budget
+      </p>
 
       {loading ? (
         <div className="py-16 text-center">
@@ -86,6 +94,13 @@ export function ResultsClient() {
             totalAllocations={data.totalAllocations}
           />
 
+          {/* Gap Cards */}
+          {userAllocations && (
+            <div className="mt-8">
+              <GapCards userAllocations={userAllocations} />
+            </div>
+          )}
+
           {/* Share CTA */}
           <div className="text-center py-12 mt-8 border-t border-gov-separator">
             <h2 className="text-2xl font-heading font-bold text-gov-navy mb-4">
@@ -95,19 +110,17 @@ export function ResultsClient() {
               Show people the gap between what citizens want and what government
               does.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={() => {
-                  const text = `I used WeChoose to allocate Canada's $521B budget. The gap between what citizens want and what government spends is eye-opening. Try it: ${window.location.origin}`;
-                  navigator.clipboard.writeText(text);
-                }}
-                className="bg-gov-navy text-white px-6 py-3 font-bold cursor-pointer hover:bg-gov-navy/90 transition-colors duration-200"
-              >
-                Copy Share Text
-              </button>
+            <ShareButtons
+              url={
+                allocationId
+                  ? `${window.location.origin}/results/share/${allocationId}`
+                  : window.location.origin + "/results"
+              }
+            />
+            <div className="mt-6">
               <Link
                 href="/allocate"
-                className="bg-transparent border-2 border-gov-navy text-gov-navy no-underline px-6 py-3 font-bold cursor-pointer hover:bg-gov-navy/5 transition-colors duration-200 text-center"
+                className="bg-transparent border-2 border-gov-navy text-gov-navy no-underline px-6 py-3 font-bold cursor-pointer hover:bg-gov-navy/5 transition-colors duration-200 text-center inline-block"
               >
                 Make Your Own Allocation
               </Link>

@@ -82,6 +82,9 @@ export function SliderGroup() {
         "wechoose_allocation",
         JSON.stringify(allocations)
       );
+      if (result.data?.id) {
+        sessionStorage.setItem("wechoose_allocation_id", result.data.id);
+      }
 
       setTimeout(() => {
         router.push("/results");

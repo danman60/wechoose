@@ -42,6 +42,14 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <GovHeader />
+        <div className="bg-gov-red/10 border-b border-gov-red/20">
+          <div className="max-w-[1200px] mx-auto px-4 py-1.5 text-center">
+            <p className="text-sm text-gov-text/80 m-0">
+              This is not a government website.{" "}
+              <span className="font-bold">It should be.</span>
+            </p>
+          </div>
+        </div>
         <main className="flex-1">{children}</main>
         <GovFooter />
         <script

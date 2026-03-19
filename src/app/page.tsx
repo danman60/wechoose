@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTotalAllocations } from "@/lib/actions/aggregates";
 import { TOTAL_SPENDING_BILLIONS, TOTAL_REVENUE_BILLIONS, DEFICIT_BILLIONS } from "@/lib/data/budget-categories";
 import { formatCurrency } from "@/lib/utils";
+import { LiveCounter } from "@/components/results/live-counter";
 
 export default async function HomePage() {
   const totalAllocations = await getTotalAllocations();
@@ -12,11 +13,12 @@ export default async function HomePage() {
       <section className="bg-gov-navy text-white py-16 md:py-24">
         <div className="max-w-[1200px] mx-auto px-4">
           <h1 className="text-white text-4xl md:text-5xl font-heading font-bold leading-tight max-w-[700px]">
-            How would <em>you</em> spend Canada&apos;s{" "}
+            The government spends{" "}
             <span className="text-white/90">
               {formatCurrency(TOTAL_SPENDING_BILLIONS)}
             </span>{" "}
-            budget?
+            of your money every year.{" "}
+            <em>They never asked how.</em>
           </h1>
           <p className="text-white/80 text-xl mt-4 max-w-[600px] leading-relaxed">
             Allocate the federal budget by your priorities. See how your choices
@@ -37,12 +39,10 @@ export default async function HomePage() {
               See Results
             </Link>
           </div>
-          {totalAllocations > 0 && (
-            <p className="text-white/60 text-base mt-6">
-              {totalAllocations.toLocaleString()} Canadians have weighed in so
-              far.
-            </p>
-          )}
+          {/* Live counter */}
+          <div className="mt-6">
+            <LiveCounter initialCount={totalAllocations} />
+          </div>
         </div>
       </section>
 
@@ -65,7 +65,7 @@ export default async function HomePage() {
               {
                 step: "3",
                 title: "Share",
-                desc: "Generate a shareable result card showing the gap between what citizens want and what government does. Spread the word.",
+                desc: "Generate a shareable result card showing the gap between what citizens want and what government does. Email your MP.",
               },
             ].map((item) => (
               <div key={item.step} className="gov-well">

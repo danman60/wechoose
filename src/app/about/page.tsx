@@ -25,14 +25,14 @@ export default function AboutPage() {
         <section>
           <h2 className="text-2xl font-heading font-bold mb-3">What is this?</h2>
           <p className="text-gov-text/80 leading-relaxed">
-            WeChoose is a direct democracy platform that asks a simple question
+            WeChoose is a direct democracy platform that asks the question
             the government never does: <strong>How would YOU spend the budget?</strong>
           </p>
           <p className="text-gov-text/80 leading-relaxed mt-3">
-            Allocate Canada&apos;s $521.4 billion federal budget across 14
-            spending categories. See how your priorities compare to the
-            government&apos;s actual spending — and to the aggregate choices of
-            all participants.
+            Every year, the federal government allocates $521.4 billion of
+            your money. They never ask you how. WeChoose changes that.
+            Allocate the budget across 14 spending categories, compare to
+            what they actually spend, and share the gap with your MP.
           </p>
         </section>
 
