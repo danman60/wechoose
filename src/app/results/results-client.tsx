@@ -6,11 +6,14 @@ import { ComparisonChart } from "@/components/results/comparison-chart";
 import { AggregateCounter } from "@/components/results/aggregate-counter";
 import { GapCards } from "@/components/results/gap-card";
 import { ConsequencePanel } from "@/components/results/consequence-panel";
+import { DemographicComparison } from "@/components/results/demographic-comparison";
+import { YourTaxDollars } from "@/components/results/your-tax-dollars";
 import { ShareButtons } from "@/components/shared/share-buttons";
 import { EmailMPButton } from "@/components/shared/email-mp-button";
+import { PrivacyNote } from "@/components/shared/privacy-note";
 import { BUDGET_CATEGORIES } from "@/lib/data/budget-categories";
 import type { Riding } from "@/lib/data/ridings";
-import type { AggregateCache } from "@/types";
+import type { AggregateCache, AgeBracket, IncomeBracket } from "@/types";
 
 interface EnrichedAggregate extends AggregateCache {
   category_slug: string;
@@ -29,6 +32,9 @@ export function ResultsClient() {
   > | null>(null);
   const [allocationId, setAllocationId] = useState<string | null>(null);
   const [riding, setRiding] = useState<Riding | null>(null);
+  const [ageBracket, setAgeBracket] = useState<AgeBracket | null>(null);
+  const [incomeBracket, setIncomeBracket] = useState<IncomeBracket | null>(null);
+  const [province, setProvince] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -53,6 +59,14 @@ export function ResultsClient() {
         // ignore
       }
     }
+
+    // Load demographics from sessionStorage
+    const storedAge = sessionStorage.getItem("wechoose_age_bracket") as AgeBracket | null;
+    if (storedAge) setAgeBracket(storedAge);
+    const storedIncome = sessionStorage.getItem("wechoose_income_bracket") as IncomeBracket | null;
+    if (storedIncome) setIncomeBracket(storedIncome);
+    const storedProvince = sessionStorage.getItem("wechoose_province");
+    if (storedProvince) setProvince(storedProvince);
 
     // Fetch aggregates
     fetch("/api/aggregate")
@@ -85,9 +99,12 @@ export function ResultsClient() {
       <h1 className="gov-h1 text-3xl md:text-4xl mb-2">
         Here&apos;s what Canadians actually want — and what they actually get.
       </h1>
-      <p className="text-lg text-gov-text/70 mb-6">
+      <p className="text-lg text-gov-text/70 mb-4">
         The People&apos;s Budget vs. The Government&apos;s Budget
       </p>
+
+      {/* Privacy info bar */}
+      <PrivacyNote variant="inline" className="mb-6" />
 
       {loading ? (
         <div className="py-16 text-center">
@@ -108,6 +125,24 @@ export function ResultsClient() {
             peopleAggregates={peopleAggregates}
             totalAllocations={data.totalAllocations}
           />
+
+          {/* Your Tax Dollars + Tax Freedom Day */}
+          {incomeBracket && userAllocations && (
+            <YourTaxDollars
+              incomeBracket={incomeBracket}
+              province={province}
+              userAllocations={userAllocations}
+            />
+          )}
+
+          {/* Demographic Comparison */}
+          {(ageBracket || incomeBracket) && (
+            <DemographicComparison
+              ageBracket={ageBracket}
+              incomeBracket={incomeBracket}
+              nationalAggregates={peopleAggregates}
+            />
+          )}
 
           {/* Gap Cards */}
           {userAllocations && (

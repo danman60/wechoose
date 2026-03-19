@@ -73,6 +73,8 @@ export async function submitAllocation(
         postal_code: input.postal_code || null,
         province: input.province || null,
         income: input.income || null,
+        age_bracket: input.age_bracket || null,
+        income_bracket: input.income_bracket || null,
         updated_at: new Date().toISOString(),
       })
       .eq("id", existing.id);
@@ -112,6 +114,8 @@ export async function submitAllocation(
       province: input.province || null,
       country_code: countryCode,
       income: input.income || null,
+      age_bracket: input.age_bracket || null,
+      income_bracket: input.income_bracket || null,
     })
     .select()
     .single();

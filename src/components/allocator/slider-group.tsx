@@ -3,10 +3,12 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { CategoryCard } from "./category-card";
+import { DemographicInputs } from "./demographic-inputs";
 import { PostalCodeInput } from "@/components/shared/postal-code-input";
 import { NeedleAnimation } from "@/components/results/needle-animation";
 import { Button } from "@/components/ui/button";
 import { BUDGET_CATEGORIES } from "@/lib/data/budget-categories";
+import type { AgeBracket, IncomeBracket } from "@/types";
 
 export function SliderGroup() {
   const router = useRouter();
@@ -21,6 +23,8 @@ export function SliderGroup() {
   );
   const [postalCode, setPostalCode] = useState("");
   const [province, setProvince] = useState<string | null>(null);
+  const [ageBracket, setAgeBracket] = useState<AgeBracket | null>(null);
+  const [incomeBracket, setIncomeBracket] = useState<IncomeBracket | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -67,6 +71,8 @@ export function SliderGroup() {
         body: JSON.stringify({
           postal_code: postalCode || undefined,
           province: province || undefined,
+          age_bracket: ageBracket || undefined,
+          income_bracket: incomeBracket || undefined,
           items,
         }),
       });
@@ -85,6 +91,16 @@ export function SliderGroup() {
       );
       if (result.data?.id) {
         sessionStorage.setItem("wechoose_allocation_id", result.data.id);
+      }
+      // Store demographics for results page
+      if (ageBracket) {
+        sessionStorage.setItem("wechoose_age_bracket", ageBracket);
+      }
+      if (incomeBracket) {
+        sessionStorage.setItem("wechoose_income_bracket", incomeBracket);
+      }
+      if (province) {
+        sessionStorage.setItem("wechoose_province", province);
       }
     } catch (err) {
       console.error("[SliderGroup] submit error:", err);
@@ -162,6 +178,16 @@ export function SliderGroup() {
             remaining={remaining}
           />
         ))}
+      </div>
+
+      {/* Demographic inputs */}
+      <div className="max-w-[1200px] mx-auto mt-6">
+        <DemographicInputs
+          ageBracket={ageBracket}
+          incomeBracket={incomeBracket}
+          onAgeBracketChange={setAgeBracket}
+          onIncomeBracketChange={setIncomeBracket}
+        />
       </div>
 
       {/* Bottom submit */}

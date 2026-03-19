@@ -15,6 +15,9 @@ export interface BudgetCategory {
   created_at: string;
 }
 
+export type AgeBracket = '18-24' | '25-34' | '35-44' | '45-54' | '55-64' | '65+';
+export type IncomeBracket = 'under-30k' | '30-50k' | '50-75k' | '75-100k' | '100-150k' | '150k+';
+
 export interface Allocation {
   id: string;
   ip_hash: string;
@@ -23,6 +26,8 @@ export interface Allocation {
   riding: string | null;
   country_code: string;
   income: number | null;
+  age_bracket: AgeBracket | null;
+  income_bracket: IncomeBracket | null;
   created_at: string;
   updated_at: string;
 }
@@ -75,6 +80,8 @@ export interface AllocationInput {
   postal_code?: string;
   province?: string;
   income?: number;
+  age_bracket?: AgeBracket;
+  income_bracket?: IncomeBracket;
   items: AllocationItemInput[];
 }
 
