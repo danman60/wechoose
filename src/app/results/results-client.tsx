@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ComparisonChart } from "@/components/results/comparison-chart";
 import { AggregateCounter } from "@/components/results/aggregate-counter";
 import { GapCards } from "@/components/results/gap-card";
+import { ConsequencePanel } from "@/components/results/consequence-panel";
 import { ShareButtons } from "@/components/shared/share-buttons";
 import { EmailMPButton } from "@/components/shared/email-mp-button";
 import { BUDGET_CATEGORIES } from "@/lib/data/budget-categories";
@@ -113,6 +114,11 @@ export function ResultsClient() {
             <div className="mt-8">
               <GapCards userAllocations={userAllocations} />
             </div>
+          )}
+
+          {/* Consequence Simulator */}
+          {userAllocations && (
+            <ConsequencePanel userAllocations={userAllocations} />
           )}
 
           {/* Email Your MP */}
