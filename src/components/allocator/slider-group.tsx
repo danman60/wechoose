@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { CategoryCard } from "./category-card";
 import { PostalCodeInput } from "@/components/shared/postal-code-input";
+import { NeedleAnimation } from "@/components/results/needle-animation";
 import { Button } from "@/components/ui/button";
 import { BUDGET_CATEGORIES } from "@/lib/data/budget-categories";
 
@@ -85,10 +86,6 @@ export function SliderGroup() {
       if (result.data?.id) {
         sessionStorage.setItem("wechoose_allocation_id", result.data.id);
       }
-
-      setTimeout(() => {
-        router.push("/results");
-      }, 1500);
     } catch (err) {
       console.error("[SliderGroup] submit error:", err);
       setError("Something went wrong. Please try again.");
@@ -99,14 +96,10 @@ export function SliderGroup() {
 
   if (success) {
     return (
-      <div className="text-center py-16">
-        <div className="text-3xl font-heading font-bold text-gov-navy mb-4">
-          Your voice has been recorded.
-        </div>
-        <p className="text-lg text-gov-text/70">
-          Redirecting to see how Canada compares...
-        </p>
-      </div>
+      <NeedleAnimation
+        userAllocations={allocations}
+        onComplete={() => router.push("/results")}
+      />
     );
   }
 
