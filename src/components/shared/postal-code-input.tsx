@@ -51,9 +51,10 @@ export function PostalCodeInput({ onPostalCodeChange }: PostalCodeInputProps) {
       const found = getRidingsByFSA(fsa);
       setRidings(found);
       // Store riding info in sessionStorage for results page
-      if (found.length === 1) {
+      if (found.length >= 1) {
         sessionStorage.setItem("wechoose_riding", JSON.stringify(found[0]));
-      } else if (found.length > 1) {
+      }
+      if (found.length > 1) {
         sessionStorage.setItem("wechoose_ridings", JSON.stringify(found));
       }
     } else {

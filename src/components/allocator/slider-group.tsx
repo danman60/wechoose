@@ -161,7 +161,7 @@ export function SliderGroup() {
       )}
 
       {/* Category grid — compact cards side by side */}
-      <div className="max-w-[1200px] mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-3">
+      <div className="max-w-[1200px] mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
         {BUDGET_CATEGORIES.map((cat) => (
           <CategoryCard
             key={cat.slug}

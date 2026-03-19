@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hashIP, getClientIP } from "@/lib/ip-hash";
-import { submitAllocation, getAllocationByIpHash } from "@/lib/actions/allocations";
-import { getCategories } from "@/lib/actions/categories";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import type { AllocationInput } from "@/types";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabaseAdmin as any;
 
 export async function POST(request: NextRequest) {
   console.log("[POST /api/allocate] called");
@@ -30,9 +32,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Map slugs to UUIDs — client sends slugs, DB expects UUIDs
-    const categoriesResult = await getCategories();
-    if (!categoriesResult.data) {
-      console.error("[POST /api/allocate] failed to fetch categories");
+    // Use admin client directly (NOT server action — cookies() fails in API routes)
+    const { data: categories, error: catError } = await db
+      .from("budget_categories")
+      .select("id, slug")
+      .eq("country_code", "CA");
+
+    if (catError || !categories) {
+      console.error("[POST /api/allocate] failed to fetch categories:", catError?.message);
       return NextResponse.json(
         { error: "Failed to load budget categories" },
         { status: 500 }
@@ -40,7 +47,7 @@ export async function POST(request: NextRequest) {
     }
 
     const slugToId: Record<string, string> = {};
-    for (const cat of categoriesResult.data) {
+    for (const cat of categories) {
       slugToId[cat.slug] = cat.id;
     }
 
@@ -49,18 +56,99 @@ export async function POST(request: NextRequest) {
       percentage: item.percentage,
     }));
 
-    const result = await submitAllocation(
-      { ...body, items: mappedItems },
-      ipHash
-    );
+    // Check if this IP already has an allocation
+    const { data: existing } = await db
+      .from("allocations")
+      .select("id")
+      .eq("ip_hash", ipHash)
+      .eq("country_code", "CA")
+      .maybeSingle();
 
-    if (result.error) {
-      console.error("[POST /api/allocate] error:", result.error);
-      return NextResponse.json({ error: result.error }, { status: 500 });
+    if (existing) {
+      console.log("[POST /api/allocate] updating existing:", existing.id);
+
+      // Delete old items
+      await db
+        .from("allocation_items")
+        .delete()
+        .eq("allocation_id", existing.id);
+
+      // Update allocation with demographics (FIX BUG-002: use ?? null, not || null)
+      const { error: updateError } = await db
+        .from("allocations")
+        .update({
+          postal_code: body.postal_code ?? null,
+          province: body.province ?? null,
+          income: body.income ?? null,
+          age_bracket: body.age_bracket ?? null,
+          income_bracket: body.income_bracket ?? null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", existing.id);
+
+      if (updateError) {
+        console.error("[POST /api/allocate] update error:", updateError.message);
+        return NextResponse.json({ error: updateError.message }, { status: 500 });
+      }
+
+      // Insert new items
+      const { error: itemsError } = await db
+        .from("allocation_items")
+        .insert(
+          mappedItems.map((item) => ({
+            allocation_id: existing.id,
+            category_id: item.category_id,
+            percentage: item.percentage,
+          }))
+        );
+
+      if (itemsError) {
+        console.error("[POST /api/allocate] items error:", itemsError.message);
+        return NextResponse.json({ error: itemsError.message }, { status: 500 });
+      }
+
+      console.log("[POST /api/allocate] updated successfully");
+      return NextResponse.json({ data: { id: existing.id, updated: true } });
     }
 
-    console.log("[POST /api/allocate] success:", result.data);
-    return NextResponse.json({ data: result.data });
+    // Create new allocation
+    const { data: allocation, error: allocError } = await db
+      .from("allocations")
+      .insert({
+        ip_hash: ipHash,
+        postal_code: body.postal_code ?? null,
+        province: body.province ?? null,
+        country_code: "CA",
+        income: body.income ?? null,
+        age_bracket: body.age_bracket ?? null,
+        income_bracket: body.income_bracket ?? null,
+      })
+      .select()
+      .single();
+
+    if (allocError) {
+      console.error("[POST /api/allocate] create error:", allocError.message);
+      return NextResponse.json({ error: allocError.message }, { status: 500 });
+    }
+
+    // Insert items
+    const { error: itemsError } = await db
+      .from("allocation_items")
+      .insert(
+        mappedItems.map((item) => ({
+          allocation_id: allocation.id,
+          category_id: item.category_id,
+          percentage: item.percentage,
+        }))
+      );
+
+    if (itemsError) {
+      console.error("[POST /api/allocate] items error:", itemsError.message);
+      return NextResponse.json({ error: itemsError.message }, { status: 500 });
+    }
+
+    console.log("[POST /api/allocate] created:", allocation.id);
+    return NextResponse.json({ data: { id: allocation.id, updated: false } });
   } catch (error) {
     console.error("[POST /api/allocate] unexpected error:", error);
     return NextResponse.json(
@@ -77,8 +165,21 @@ export async function GET(request: NextRequest) {
     const ip = getClientIP(request);
     const ipHash = hashIP(ip);
 
-    const result = await getAllocationByIpHash(ipHash);
-    return NextResponse.json({ data: result.data });
+    const { data, error } = await db
+      .from("allocations")
+      .select("*, allocation_items(*)")
+      .eq("ip_hash", ipHash)
+      .eq("country_code", "CA")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error("[GET /api/allocate] error:", error.message);
+      return NextResponse.json({ data: null });
+    }
+
+    return NextResponse.json({ data });
   } catch (error) {
     console.error("[GET /api/allocate] error:", error);
     return NextResponse.json({ data: null });
