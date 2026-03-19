@@ -6,8 +6,10 @@ import { Menu, X } from "lucide-react";
 import { Wordmark } from "./wordmark";
 
 const NAV_ITEMS = [
-  { href: "/allocate", label: "Allocate Your Budget" },
+  { href: "/allocate", label: "Allocate" },
   { href: "/results", label: "Results" },
+  { href: "/provinces", label: "Provinces" },
+  { href: "/trends", label: "Trends" },
   { href: "/tax-truth", label: "Tax Truth" },
   { href: "/about", label: "About" },
 ];
