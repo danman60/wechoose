@@ -14,6 +14,18 @@ export function ComparisonChart({
   peopleAggregates,
   totalAllocations,
 }: ComparisonChartProps) {
+  // Find the max value for scaling bars
+  const maxPct = Math.max(
+    ...BUDGET_CATEGORIES.map((cat) => {
+      const govPct = cat.actual_percentage;
+      const peoplePct = peopleAggregates[cat.slug] ?? 0;
+      const userPct = userAllocations?.[cat.slug] ?? 0;
+      return Math.max(govPct, peoplePct, userPct);
+    }),
+    1
+  );
+  const scale = 100 / maxPct;
+
   return (
     <div className="space-y-4">
       {/* Legend */}
@@ -37,14 +49,18 @@ export function ComparisonChart({
       </div>
 
       {/* Category rows */}
-      {BUDGET_CATEGORIES.map((cat) => {
+      {BUDGET_CATEGORIES.map((cat, index) => {
         const govPct = cat.actual_percentage;
         const peoplePct = peopleAggregates[cat.slug] ?? 0;
         const userPct = userAllocations?.[cat.slug] ?? null;
         const diff = peoplePct - govPct;
 
         return (
-          <div key={cat.slug} className="gov-well">
+          <div
+            key={cat.slug}
+            className="bg-white border border-gov-well-border p-4 hover:border-gov-navy/30 transition-all duration-200"
+            style={{ animationDelay: `${index * 50}ms` }}
+          >
             <div className="flex items-start justify-between mb-2">
               <div>
                 <h4 className="text-base font-bold text-gov-text">
@@ -57,9 +73,9 @@ export function ComparisonChart({
               {totalAllocations > 0 && (
                 <div
                   className={`text-sm font-bold px-2 py-0.5 ${
-                    diff > 0
+                    diff > 0.5
                       ? "text-diff-positive bg-diff-positive/10"
-                      : diff < 0
+                      : diff < -0.5
                       ? "text-diff-negative bg-diff-negative/10"
                       : "text-gov-text/50"
                   }`}
@@ -77,10 +93,10 @@ export function ComparisonChart({
                   <span className="text-xs text-gov-text/60 w-16 shrink-0">
                     You
                   </span>
-                  <div className="flex-1 h-5 bg-gov-well-border/50 overflow-hidden">
+                  <div className="flex-1 h-5 bg-gov-well-border/30 overflow-hidden">
                     <div
                       className="h-full bg-people-blue transition-all duration-700 ease-out"
-                      style={{ width: `${(userPct / 30) * 100}%` }}
+                      style={{ width: `${userPct * scale}%` }}
                     />
                   </div>
                   <span className="text-xs font-semibold text-people-blue w-12 text-right">
@@ -94,14 +110,14 @@ export function ComparisonChart({
                 <span className="text-xs text-gov-text/60 w-16 shrink-0">
                   People
                 </span>
-                <div className="flex-1 h-5 bg-gov-well-border/50 overflow-hidden">
+                <div className="flex-1 h-5 bg-gov-well-border/30 overflow-hidden">
                   <div
                     className="h-full bg-[#8B5CF6] transition-all duration-700 ease-out"
-                    style={{ width: `${(peoplePct / 30) * 100}%` }}
+                    style={{ width: `${peoplePct * scale}%` }}
                   />
                 </div>
                 <span className="text-xs font-semibold text-[#8B5CF6] w-12 text-right">
-                  {peoplePct > 0 ? peoplePct.toFixed(1) + "%" : "—"}
+                  {peoplePct > 0 ? peoplePct.toFixed(1) + "%" : "\u2014"}
                 </span>
               </div>
 
@@ -110,10 +126,10 @@ export function ComparisonChart({
                 <span className="text-xs text-gov-text/60 w-16 shrink-0">
                   Gov&apos;t
                 </span>
-                <div className="flex-1 h-5 bg-gov-well-border/50 overflow-hidden">
+                <div className="flex-1 h-5 bg-gov-well-border/30 overflow-hidden">
                   <div
                     className="h-full bg-gov-red transition-all duration-700 ease-out"
-                    style={{ width: `${(govPct / 30) * 100}%` }}
+                    style={{ width: `${govPct * scale}%` }}
                   />
                 </div>
                 <span className="text-xs font-semibold text-gov-red w-12 text-right">

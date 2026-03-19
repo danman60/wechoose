@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hashIP, getClientIP } from "@/lib/ip-hash";
 import { submitAllocation, getAllocationByIpHash } from "@/lib/actions/allocations";
+import { getCategories } from "@/lib/actions/categories";
 import type { AllocationInput } from "@/types";
 
 export async function POST(request: NextRequest) {
@@ -28,7 +29,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await submitAllocation(body, ipHash);
+    // Map slugs to UUIDs — client sends slugs, DB expects UUIDs
+    const categoriesResult = await getCategories();
+    if (!categoriesResult.data) {
+      console.error("[POST /api/allocate] failed to fetch categories");
+      return NextResponse.json(
+        { error: "Failed to load budget categories" },
+        { status: 500 }
+      );
+    }
+
+    const slugToId: Record<string, string> = {};
+    for (const cat of categoriesResult.data) {
+      slugToId[cat.slug] = cat.id;
+    }
+
+    const mappedItems = body.items.map((item) => ({
+      category_id: slugToId[item.category_id] || item.category_id,
+      percentage: item.percentage,
+    }));
+
+    const result = await submitAllocation(
+      { ...body, items: mappedItems },
+      ipHash
+    );
 
     if (result.error) {
       console.error("[POST /api/allocate] error:", result.error);

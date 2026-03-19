@@ -6,8 +6,12 @@ import { ComparisonChart } from "@/components/results/comparison-chart";
 import { AggregateCounter } from "@/components/results/aggregate-counter";
 import type { AggregateCache } from "@/types";
 
+interface EnrichedAggregate extends AggregateCache {
+  category_slug: string;
+}
+
 interface AggregateResponse {
-  aggregates: AggregateCache[];
+  aggregates: EnrichedAggregate[];
   totalAllocations: number;
 }
 
@@ -40,11 +44,11 @@ export function ResultsClient() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Build people aggregates map from category_id to average_percentage
+  // Build people aggregates map keyed by slug
   const peopleAggregates: Record<string, number> = {};
   if (data?.aggregates) {
     for (const agg of data.aggregates) {
-      peopleAggregates[agg.category_id] = agg.average_percentage;
+      peopleAggregates[agg.category_slug] = agg.average_percentage;
     }
   }
 
@@ -64,7 +68,9 @@ export function ResultsClient() {
 
       {loading ? (
         <div className="py-16 text-center">
-          <div className="text-lg text-gov-text/60">Loading results...</div>
+          <div className="text-lg text-gov-text/60 animate-pulse">
+            Loading results...
+          </div>
         </div>
       ) : data && data.totalAllocations > 0 ? (
         <>
