@@ -86,7 +86,10 @@ export function CategoryCard({
           step={0.5}
           value={userPercentage}
           onChange={(e) => onPercentageChange(parseFloat(e.target.value))}
-          className="w-full h-1.5 appearance-none bg-gov-well-border cursor-pointer accent-people-blue"
+          className="budget-slider"
+          style={{
+            "--fill-percent": `${maxAllowed > 0 ? (userPercentage / Math.min(100, maxAllowed)) * 100 : 0}%`,
+          } as React.CSSProperties}
         />
 
         {/* Values row */}

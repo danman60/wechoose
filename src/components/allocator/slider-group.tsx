@@ -127,30 +127,34 @@ export function SliderGroup() {
           isValid ? "border-b-diff-positive" : ""
         }`}
       >
-        <div className="max-w-[1200px] mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div>
+        <div className="max-w-[1200px] mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+          <div className="flex items-center justify-between sm:justify-start gap-3 sm:gap-4">
+            <div className="flex items-center gap-2">
               <span className="text-lg font-bold font-heading text-gov-text">
-                Allocated:{" "}
                 <span className={isValid ? "text-diff-positive" : "text-people-blue"}>
                   {totalAllocated.toFixed(1)}%
                 </span>
               </span>
               {!isValid && (
-                <span className="text-sm text-gov-text/60 ml-3">
-                  {remaining.toFixed(1)}% remaining
+                <span className="text-xs text-gov-text/60">
+                  {remaining.toFixed(1)}% left
                 </span>
               )}
             </div>
+            <div className="hidden sm:block">
+              <PostalCodeInput onPostalCodeChange={handlePostalCodeChange} />
+            </div>
+            <Button
+              onClick={handleSubmit}
+              disabled={!isValid || submitting}
+              className="bg-gov-navy text-white hover:bg-gov-navy/90 rounded-none px-4 sm:px-6 py-2 text-sm sm:text-base cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitting ? "Submitting..." : "Submit"}
+            </Button>
+          </div>
+          <div className="sm:hidden">
             <PostalCodeInput onPostalCodeChange={handlePostalCodeChange} />
           </div>
-          <Button
-            onClick={handleSubmit}
-            disabled={!isValid || submitting}
-            className="bg-gov-navy text-white hover:bg-gov-navy/90 rounded-none px-6 py-2 text-base cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {submitting ? "Submitting..." : "Submit My Budget"}
-          </Button>
         </div>
       </div>
 

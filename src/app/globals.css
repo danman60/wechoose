@@ -155,6 +155,84 @@
   padding: 16px 20px;
 }
 
+/* Budget slider — mobile-friendly touch target */
+input[type="range"].budget-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 44px;
+  background: transparent;
+  cursor: pointer;
+  touch-action: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Track */
+input[type="range"].budget-slider::-webkit-slider-runnable-track {
+  height: 6px;
+  background: #E3E3E3;
+  border-radius: 3px;
+}
+input[type="range"].budget-slider::-moz-range-track {
+  height: 6px;
+  background: #E3E3E3;
+  border-radius: 3px;
+  border: none;
+}
+
+/* Thumb */
+input[type="range"].budget-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #2E86DE;
+  border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  margin-top: -11px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+input[type="range"].budget-slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #2E86DE;
+  border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Active/dragging state — grow thumb */
+input[type="range"].budget-slider:active::-webkit-slider-thumb {
+  transform: scale(1.25);
+  box-shadow: 0 2px 8px rgba(46,134,222,0.4);
+}
+input[type="range"].budget-slider:active::-moz-range-thumb {
+  transform: scale(1.25);
+  box-shadow: 0 2px 8px rgba(46,134,222,0.4);
+}
+
+/* Fill track (Webkit — uses gradient trick) */
+input[type="range"].budget-slider {
+  --fill-percent: 0%;
+}
+input[type="range"].budget-slider::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    to right,
+    #2E86DE 0%,
+    #2E86DE var(--fill-percent),
+    #E3E3E3 var(--fill-percent),
+    #E3E3E3 100%
+  );
+}
+input[type="range"].budget-slider::-moz-range-progress {
+  background: #2E86DE;
+  height: 6px;
+  border-radius: 3px;
+}
+
 /* Responsive typography */
 @media (max-width: 768px) {
   body { font-size: 18px; }
