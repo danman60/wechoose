@@ -4,10 +4,13 @@ import { useState } from "react";
 import * as LucideIcons from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { TOTAL_SPENDING_BILLIONS } from "@/lib/data/budget-categories";
+import { CategoryInfoPopover } from "./category-info-popover";
+import { CATEGORY_DETAILS } from "@/lib/data/category-details";
 
 interface CategoryCardProps {
   name: string;
   description: string;
+  slug: string;
   icon: string | null;
   actualPercentage: number;
   actualAmountBillions: number;
@@ -19,6 +22,7 @@ interface CategoryCardProps {
 
 export function CategoryCard({
   name,
+  slug,
   icon,
   actualPercentage,
   actualAmountBillions,
@@ -45,6 +49,7 @@ export function CategoryCard({
     (userPercentage / 100) * TOTAL_SPENDING_BILLIONS;
   const maxAllowed = userPercentage + remaining;
   const diff = userPercentage - actualPercentage;
+  const detail = CATEGORY_DETAILS[slug];
 
   return (
     <div className="bg-white border border-gov-well-border p-3 hover:border-gov-navy/30 transition-colors duration-200 flex flex-col h-full">
@@ -58,9 +63,14 @@ export function CategoryCard({
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-bold text-gov-text leading-tight truncate">
-            {name}
-          </h3>
+          <div className="flex items-center gap-1.5">
+            <h3 className="text-sm font-bold text-gov-text leading-tight truncate">
+              {name}
+            </h3>
+            {detail && (
+              <CategoryInfoPopover detail={detail} categoryName={name} />
+            )}
+          </div>
           <div className="text-xs text-gov-text/50">
             Gov: {actualPercentage}% · {formatCurrency(actualAmountBillions)}
           </div>

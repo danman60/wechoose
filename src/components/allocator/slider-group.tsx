@@ -167,6 +167,7 @@ export function SliderGroup() {
             key={cat.slug}
             name={cat.name}
             description={cat.description}
+            slug={cat.slug}
             icon={cat.icon}
             actualPercentage={cat.actual_percentage}
             actualAmountBillions={cat.actual_amount_billions}
