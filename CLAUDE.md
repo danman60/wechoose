@@ -33,3 +33,5 @@ A civic engagement platform where Canadians allocate the federal budget by perce
 
 ## Test Account
 - No auth needed — anonymous platform
+
+<!-- GitNexus rules: see master ~/projects/CLAUDE.md → "GitNexus Workflow" section. Per-project index name is the project folder name. -->
